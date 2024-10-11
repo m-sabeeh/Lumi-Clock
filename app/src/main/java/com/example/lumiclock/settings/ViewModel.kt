@@ -13,7 +13,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     data class ScreenState(
         val sleepColorSmooth: List<Color> = emptyList(),
-        val rainbowColors: List<Color> = Rainbow.colors
+        val rainbowColors: List<Color> = Rainbow.colors,
+        val currentColor: Color = Rainbow.colors.first()
     )
 
     val screenState = MutableStateFlow(ScreenState())
@@ -41,5 +42,11 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         return colors
+    }
+
+    fun updateCurrentColor(color: Color) {
+        screenState.update {
+            it.copy(currentColor = color)
+        }
     }
 }

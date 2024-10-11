@@ -1,6 +1,7 @@
 package com.example.lumiclock
 
 import android.os.Bundle
+import android.os.Handler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.LifecycleOwner
 import com.example.lumiclock.settings.Settings
 import com.example.lumiclock.settings.ViewModel
 import com.example.lumiclock.ui.theme.LumiClockTheme
@@ -44,10 +46,32 @@ import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
     val viewModel by viewModels<ViewModel>()
+    val handler by lazy {
+        Handler(mainLooper)
+    }
+    private var currentHour: Int = -1
+    private val runnable = object : Runnable {
+        override fun run() {
+            val calendar = Calendar.getInstance()
+            val newHour = calendar.get(Calendar.HOUR_OF_DAY)
+
+            if (newHour != currentHour) {
+                currentHour = newHour
+                updateBackgroundColor()
+            }
+            calendar.timeInMillis = System.currentTimeMillis()
+            val currentSecond = calendar.get(Calendar.SECOND)
+            val currentMillisecond = calendar.get(Calendar.MILLISECOND)
+            val delay = 60000 - (currentSecond * 1000 + currentMillisecond)
+            // Re-run the handler at the start of the next minute
+            handler.postDelayed(this, delay.toLong())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,14 +86,30 @@ class MainActivity : ComponentActivity() {
         setContent {
             val screenState by viewModel.screenState.collectAsState()
             LumiClockTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Settings(
-                        modifier = Modifier.padding(innerPadding),
-                        screenState = screenState
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    CupcakeApp(
+                        state = screenState
                     )
-                }
+//                }
             }
         }
+        lifecycle.addObserver(object : FullLifecycleObserverAdapter() {
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                updateBackgroundColor()
+                handler.post(runnable)
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                super.onPause(owner)
+                handler.removeCallbacks(runnable)
+            }
+        })
+    }
+
+    fun updateBackgroundColor() {
+        val hourToUse = currentHour.coerceAtLeast(0).coerceAtMost(23)
+        viewModel.updateCurrentColor(viewModel.screenState.value.rainbowColors[hourToUse])
     }
 }
 

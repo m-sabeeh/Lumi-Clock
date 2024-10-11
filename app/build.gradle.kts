@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.compose.colorpicker)
+    implementation(libs.androidx.navigation.compose)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
