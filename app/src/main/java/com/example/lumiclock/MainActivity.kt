@@ -114,13 +114,17 @@ class MainActivity : ComponentActivity() {
 }
 
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun GreetingPreview() {
-//    LumiClockTheme {
-//        Settings("Android")
-//    }
-//}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun GreetingPreview() {
+    LumiClockTheme {
+        Settings(
+            screenState = ViewModel.ScreenState(),
+            navigateUp = {},
+            canNavigateBack = true
+        )
+    }
+}
 
 @Preview
 @Composable

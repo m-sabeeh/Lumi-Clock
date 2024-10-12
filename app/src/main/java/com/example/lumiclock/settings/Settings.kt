@@ -41,13 +41,19 @@ import com.example.lumiclock.ui.theme.LumiClockTheme
 import com.example.lumiclock.ui.theme.Rainbow
 import com.github.skydoves.colorpicker.compose.AlphaTile
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    LumiClockTheme {
-//        Settings(screenState = ViewModel.ScreenState(rainbowColors = Rainbow.colors))
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    LumiClockTheme {
+        Settings(
+            screenState = ViewModel.ScreenState(
+                rainbowColors = Rainbow.colors,
+            ),
+            canNavigateBack = true,
+            navigateUp = {}
+        )
+    }
+}
 
 @Composable
 fun Settings(
