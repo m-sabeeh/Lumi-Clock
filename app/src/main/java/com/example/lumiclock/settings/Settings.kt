@@ -66,8 +66,8 @@ fun Settings(
     navigateUp: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val scrollState = rememberScrollState()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LumiAppBar(
                 scrollBehavior = scrollBehavior,
@@ -79,8 +79,7 @@ fun Settings(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
         ) {
             val radioOptions = ColorSetting.entries.toTypedArray()
