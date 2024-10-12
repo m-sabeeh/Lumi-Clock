@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.waterfall
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.SideE
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
@@ -97,6 +99,7 @@ fun Settings(
 //    }
 //    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 //        contentWindowInsets = WindowInsets.Companion.displayCutout,
@@ -111,8 +114,15 @@ fun Settings(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+//                .padding(innerPadding)
+                .windowInsetsPadding(
+                    if (scrollBehavior.state.collapsedFraction < 1f) {
+                        WindowInsets(top = innerPadding.calculateTopPadding())
+                    } else {
+                        WindowInsets(top = (innerPadding.calculateTopPadding() - scrollState.value.dp).coerceAtLeast(0.dp))
+                    }
+                )
+                .verticalScroll(scrollState)
         ) {
             val radioOptions = ColorSetting.entries.toTypedArray()
             val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
