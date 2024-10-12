@@ -1,5 +1,6 @@
 package com.example.lumiclock.settings
 
+import android.app.Activity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -7,11 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.waterfall
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,22 +23,32 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.SideEffect
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.example.lumiclock.LumiAppBar
 import com.example.lumiclock.LumiScreen
 import com.example.lumiclock.ui.theme.LumiClockTheme
@@ -55,16 +69,40 @@ fun GreetingPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(
-    modifier: Modifier = Modifier,
     screenState: ViewModel.ScreenState,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit
 ) {
+    val view = LocalView.current
+//    if (!view.isInEditMode) {
+//    SideEffect {
+//        val window = (view.context as Activity).window
+////        window.statusBarColor = colorScheme.primary.toArgb()
+////        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
+////            !darkTheme // negate darkTheme
+//        ViewCompat.setOnApplyWindowInsetsListener(view) { view, windowInsets ->
+//            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
+//            // Apply the insets as padding to the view. Here, set all the dimensions
+//            // as appropriate to your layout. You can also update the view's margin if
+//            // more appropriate.
+//            view.updatePadding(insets.left, insets.top, insets.right, insets.bottom)
+//
+//            // Return CONSUMED if you don't want the window insets to keep passing down
+//            // to descendant views.
+//            WindowInsetsCompat.CONSUMED
+//        }
+//    }
+//    }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+//        contentWindowInsets = WindowInsets.Companion.displayCutout,
         topBar = {
             LumiAppBar(
+                scrollBehavior = scrollBehavior,
                 currentScreen = LumiScreen.Settings,
                 canNavigateBack = canNavigateBack,
                 navigateUp = navigateUp
@@ -72,8 +110,7 @@ fun Settings(
         }
     ) { innerPadding ->
         Column(
-            modifier = modifier
-
+            modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -82,7 +119,7 @@ fun Settings(
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = "Clock Colors",
+                text = "Hours Color",
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -98,7 +135,7 @@ fun Settings(
                 val activeBorder = Color.Blue
                 repeat(24) { index ->
                     Column(
-                        modifier
+                        Modifier
                             .defaultMinSize(minWidth = 24.dp)
                             .border(
                                 width = 0.2.dp,
@@ -338,6 +375,47 @@ fun Settings(
             }
             Spacer(modifier = Modifier.padding(6.dp))
             val checkedState = remember { mutableStateOf(true) }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Checkbox(
+                    checked = checkedState.value,
+                    onCheckedChange = { checkedState.value = it }
+                )
+                Text(
+                    text = "Smooth Transition",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+            OutlinedButton(
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .align(Alignment.End),
+                onClick = { }) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = "Reset",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = "Color Transition",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = MaterialTheme.colorScheme.primary
+                )
+            )
+            //Repated code
+            Spacer(modifier = Modifier.padding(6.dp))
+            val checkedStates = remember { mutableStateOf(true) }
             Row(
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
